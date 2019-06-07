@@ -9,22 +9,22 @@ class Nodo{
         string dato;
         int rep;
         Nodo *next;
-        Nodo *hi;
-        Nodo *hd;
+        Nodo *izq;
+        Nodo *der;
         Nodo *ordena;
     public:
         Nodo() {next=NULL;};
         Nodo(string a) {dato=a; next=NULL;};
         void set_dato(string a) {dato=a; };
         void set_next(Nodo *n) {next=n; };
-        void set_hi(Nodo *n) {hi=n; };
-        void set_hd(Nodo *n) {hd=n; };
+        void set_izq(Nodo *n) {izq=n; };
+        void set_der(Nodo *n) {der=n; };
         string get_dato() {return dato; };
         void set_rep(int r) {rep = r;};
         int get_rep(){return rep;};
         Nodo *get_next() {return next; };
-        Nodo *get_hi() {return hi; };
-        Nodo *get_hd() {return hd; };
+        Nodo *get_izq() {return izq; };
+        Nodo *get_der() {return der; };
         bool es_vacio() {return next==NULL;}
 };
 
@@ -147,6 +147,98 @@ bool existe(Lista *l, string p){
 	else getNodo(l->resto(),p);	
 }
 */
+
+class arbol{
+    Nodo* raiz, q;
+    void ArbolBusq(string x, Nodo* &nuevo);
+    void rid(Nodo* aux);
+    void ird(Nodo* aux);
+    void idr(Nodo* aux);
+    void show(Nodo* aux, int n);
+    void borrar(Nodo* &p, string x);
+    void bor(Nodo* &d);
+    void mh(Nodo* aux);
+    string menor(Nodo* aux);
+    bool esta(Nodo* aux, string x);
+public:
+    arbol(){raiz=NULL;};
+    ~arbol(){};
+    void CreaArbolBus(string x);
+    void RID(){ rid(raiz); }
+    void IRD(){ ird(raiz); }
+    void IDR(){ idr(raiz); }
+    void VerArbol(){ show(raiz,0); }
+    void Borrar(string x){ borrar(raiz,x);}
+    void MostrarHojas(){mh(raiz);}
+    string Menor(){return menor(raiz);}
+    bool Esta(string x){return esta(raiz,x);}
+};
+
+
+bool arbol::esta(Nodo* aux, string x)
+{ if(aux==NULL) return false;
+  else if(x>aux->get_dato()) return esta(aux->get_der(),x);
+  else if(x<aux->get_dato()) return esta(aux->get_izq(),x);
+  return true;
+
+}
+
+void arbol::mh(Nodo* aux)
+{  if(aux!=NULL){
+        mh(aux->get_izq());
+        if(aux->get_izq()==NULL && aux->get_der()==NULL)cout<<"\n"<<aux->get_dato();
+        mh(aux->get_der());
+   }   
+}
+
+string arbol::menor(Nodo* aux)
+{  if(aux->get_izq()==NULL)return aux->get_dato();
+   return menor(aux->get_izq());
+}
+
+
+void arbol::CreaArbolBus(string x)
+{ ArbolBusq(x,raiz);
+}
+void arbol::ArbolBusq(string x, Nodo* &nuevo)
+{
+  if(nuevo==NULL){
+      nuevo= new Nodo();
+      nuevo->set_dato(x); nuevo->set_der(NULL); nuevo->set_izq(NULL);
+  }
+  if(x > nuevo->get_dato()) ArbolBusq(x, nuevo->get_der());
+  if(x < nuevo->get_dato()) ArbolBusq(x, nuevo->get_izq());
+}
+void arbol::ird(Nodo* aux)
+{  if(aux!=NULL){
+        ird(aux->get_izq());
+        cout<<"\n"<<aux->get_dato();
+        ird(aux->get_der());
+   }
+}
+void arbol::rid(Nodo* aux)
+{  if(aux!=NULL){
+        cout<<"\n"<<aux->get_dato();
+        rid(aux->get_izq());
+        rid(aux->get_der());
+   }
+}
+void arbol::idr(Nodo* aux)
+{  if(aux!=NULL){
+        idr(aux->get_izq());
+        idr(aux->get_der());
+        cout<<"\n"<<aux->get_dato();
+   }
+}
+void arbol::show(Nodo* aux, int n)
+{ int i;
+   if(aux!=NULL){                      //OjO este es un recorrido dri
+       show(aux->get_der(), n+1);
+       for(i=1; i<=n; i++) cout<<"     ";
+       cout<<aux->get_dato()<<"\n";
+       show(aux->get_izq(), n+1);
+   }
+}
 	
 int main() {	
 	fstream archivo;
