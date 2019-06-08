@@ -13,18 +13,18 @@ class Nodo{
         Nodo *der;
         Nodo *ordena;
     public:
-        Nodo() {next=NULL;};
-        Nodo(string a) {dato=a; next=NULL;};
+        Nodo() {rep = 0; next=NULL;};
+        Nodo(string a) {dato=a; next=NULL; rep=0;};
         void set_dato(string a) {dato=a; };
         void set_next(Nodo *n) {next=n; };
         void set_izq(Nodo *n) {izq=n; };
         void set_der(Nodo *n) {der=n; };
         string get_dato() {return dato; };
-        void set_rep(int r) {rep = r;};
+        void set_rep() {rep = rep+1;};
         int get_rep(){return rep;};
         Nodo *get_next() {return next; };
-        Nodo *get_izq() {return izq; };
-        Nodo *get_der() {return der; };
+        Nodo *&get_izq() {return izq; };
+        Nodo *&get_der() {return der; };
         bool es_vacio() {return next==NULL;}
 };
 
@@ -34,7 +34,7 @@ class Lista{
             Lista() {czo=new Nodo();};
             Lista(Nodo *n) {czo=n;};
             //~Lista(void);
-            void add(string d);
+            void add(Nodo* nuevo);
             bool esvacia(void);
             Nodo* cabeza(void);
             Lista *resto(void);
@@ -58,13 +58,12 @@ void Lista::impre(void)
 { Nodo *aux;
   aux=czo;
     while(aux->get_next()!=NULL){
-         cout<<aux->get_dato()<<endl;
+         cout<<aux->get_dato()<< " -  repeticiones: "<< aux->get_rep()<<endl;
          aux=aux->get_next();
     }
 }
-void Lista::add(string d)
+void Lista::add(Nodo* nuevo)
 {  
-     Nodo *nuevo=new Nodo(d);
      nuevo->set_next(czo);
      czo=nuevo;
 }
@@ -114,43 +113,11 @@ void Lista::borrar_last()
       }
       else this->resto()->borrar_last(); 
    }  
-}
-
-/*Lista *Lista::copy(void)
-{ 
-      Lista *aux=new Lista();
-      aux->concat(this);
-      return aux;
-}*/
-void Lista::tomar(int n)
-{ //deja "vivos" los n primeros nodos y borra el resto
-/*   if(!(this->esvacia())) {
-      if (n>0) this->resto()->tomar(n-1);
-      else     czo->set_next(NULL);
-   }
-*/
-   if(this->size()>n){
-      this->borrar_last();
-      this->tomar(n);
-   }
-}
-Nodo* getNodo(Lista *l, string p){
-	if(l->cabeza()->get_dato() == p)
-		return l->cabeza();
-	else getNodo(l->resto(),p);	
 }	
-/*
-verifica si la palabra ya existe en la lista
-bool existe(Lista *l, string p){
-	if(l->cabeza()->get_dato() == p)
-		return true;
-	else getNodo(l->resto(),p);	
-}
-*/
 
 class arbol{
     Nodo* raiz, q;
-    void ArbolBusq(string x, Nodo* &nuevo);
+    Nodo* ArbolBusq(string x, Nodo* &nuevo);
     void rid(Nodo* aux);
     void ird(Nodo* aux);
     void idr(Nodo* aux);
@@ -163,7 +130,7 @@ class arbol{
 public:
     arbol(){raiz=NULL;};
     ~arbol(){};
-    void CreaArbolBus(string x);
+    Nodo* CreaArbolBus(string x);
     void RID(){ rid(raiz); }
     void IRD(){ ird(raiz); }
     void IDR(){ idr(raiz); }
@@ -197,17 +164,18 @@ string arbol::menor(Nodo* aux)
 }
 
 
-void arbol::CreaArbolBus(string x)
-{ ArbolBusq(x,raiz);
+Nodo* arbol::CreaArbolBus(string x)
+{ return ArbolBusq(x,raiz);
 }
-void arbol::ArbolBusq(string x, Nodo* &nuevo)
+Nodo* arbol::ArbolBusq(string x, Nodo* &nuevo)
 {
   if(nuevo==NULL){
       nuevo= new Nodo();
       nuevo->set_dato(x); nuevo->set_der(NULL); nuevo->set_izq(NULL);
+      return nuevo;
   }
-  if(x > nuevo->get_dato()) ArbolBusq(x, nuevo->get_der());
-  if(x < nuevo->get_dato()) ArbolBusq(x, nuevo->get_izq());
+  if(x > nuevo->get_dato()) return ArbolBusq(x, nuevo->get_der());
+  if(x < nuevo->get_dato()) return ArbolBusq(x, nuevo->get_izq());
 }
 void arbol::ird(Nodo* aux)
 {  if(aux!=NULL){
@@ -239,12 +207,22 @@ void arbol::show(Nodo* aux, int n)
        show(aux->get_izq(), n+1);
    }
 }
+
+void sumarRepeticion(Lista *l, string p){
+	if(l->cabeza()->get_dato().compare(p) == 0){
+		l->cabeza()->set_rep();
+		return ;
+	}else {
+		sumarRepeticion(l->resto(),p);		
+	}
+}
 	
 int main() {	
 	fstream archivo;
 	string linea;
-	Nodo *nodo = new Nodo();
-	Lista* lista = new Lista(nodo);
+	Nodo* nodoAux;
+	Lista* lista = new Lista();
+	arbol T;
 	
 	archivo.open("texto.txt", ios::in); //abre archivo en modo lectura
 		
@@ -260,16 +238,19 @@ int main() {
 
 			while( iss >> palabra )     
 			{
-			    // Do something on `word` here...
-			    if(lista->esvacia()){
-			    	lista->add(palabra);
-				}else{
-					//recorrer lista y verificar si contiene la palabra
+				if(!T.Esta(palabra)){
+					lista->add(T.CreaArbolBus(palabra));
+					//T.VerArbol();
+					cout<<lista->size();
+					//cout<<lista->cabeza()->get_dato();
+					lista->impre();
+					cout <<"--------------------------------------------------------------" << endl;
 				}
-			    cout << palabra << endl;
-			    
+				else {
+					sumarRepeticion(lista, palabra);
+				}
 			}
-	
 	}
 	archivo.close(); 
+	T.IRD();
 }
