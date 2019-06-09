@@ -48,6 +48,9 @@ class Lista{
             void concat(Lista *l1);
             Lista *copy(void);
             void tomar(int n);
+            Nodo* last();
+            void ordenaInsercion(Nodo* nuevo);
+            
 };
 int Lista::size()
 { 
@@ -57,8 +60,8 @@ int Lista::size()
 void Lista::impre(void)
 { Nodo *aux;
   aux=czo;
-    while(aux->get_next()!=NULL){
-         cout<<aux->get_dato()<< " -  repeticiones: "<< aux->get_rep()<<endl;
+    while(aux->get_next()->get_next()!=NULL){
+         cout<<aux->get_next()->get_dato()<< " -  repeticiones: "<< aux->get_next()->get_rep()<<endl;
          aux=aux->get_next();
     }
 }
@@ -67,6 +70,12 @@ void Lista::add(Nodo* nuevo)
      nuevo->set_next(czo);
      czo=nuevo;
 }
+
+Nodo* Lista::last(void){
+		if(czo->get_next()==NULL) return czo;
+		else resto()->last();
+}
+
 bool Lista::esvacia(void)
 {   
     return czo->es_vacio();
@@ -88,7 +97,7 @@ string Lista::toPrint(string p)
         return p;
      } else {
        std::ostringstream stm;
-       stm << this->cabeza()<<" - "<< this->resto()->toPrint(p) << endl;
+       stm << this->cabeza()->get_dato()<<" - "<< this->resto()->toPrint(p) << endl;
       //cout<<endl<<" stm.str()= "<<stm.str()<<endl;
        return stm.str();
      }
@@ -114,6 +123,21 @@ void Lista::borrar_last()
       else this->resto()->borrar_last(); 
    }  
 }	
+void Lista::ordenaInsercion(Nodo* nuevo){
+	string palabra = nuevo->get_dato();
+	Nodo* aux = this->cabeza();
+	
+	if(aux == NULL || aux->get_dato() > palabra){ //Si es el ultimo nodo o esta vacia
+		nuevo->set_next(aux);
+		aux = nuevo;
+	}else {
+		while(aux->get_next()!=NULL && aux->get_next()->get_dato() < palabra){
+			aux = aux->get_next();
+		}
+		nuevo->set_next(aux->get_next());
+		aux->set_next(nuevo);
+	}		
+}
 
 class arbol{
     Nodo* raiz, q;
@@ -216,13 +240,14 @@ void sumarRepeticion(Lista *l, string p){
 		sumarRepeticion(l->resto(),p);		
 	}
 }
+
 	
 int main() {	
 	fstream archivo;
 	string linea;
-	Nodo* nodoAux;
 	Lista* lista = new Lista();
 	arbol T;
+	Nodo* czo = lista->cabeza(); 
 	
 	archivo.open("texto.txt", ios::in); //abre archivo en modo lectura
 		
@@ -239,18 +264,18 @@ int main() {
 			while( iss >> palabra )     
 			{
 				if(!T.Esta(palabra)){
-					lista->add(T.CreaArbolBus(palabra));
+					lista->ordenaInsercion(T.CreaArbolBus(palabra));
 					//T.VerArbol();
-					cout<<lista->size();
-					//cout<<lista->cabeza()->get_dato();
-					lista->impre();
-					cout <<"--------------------------------------------------------------" << endl;
+					//cout<<lista->size();
+					//cout <<"--------------------------------------------------------------" << endl;
 				}
 				else {
 					sumarRepeticion(lista, palabra);
 				}
 			}
 	}
-	archivo.close(); 
+	archivo.close(); 	
+	lista->impre(); //no imprime la ultima palabra
+	cout << lista->last()->get_dato() <<" - repeticiones " << lista->last()->get_rep() <<  endl;
 	T.IRD();
 }
