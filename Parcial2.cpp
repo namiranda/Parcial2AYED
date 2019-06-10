@@ -11,7 +11,7 @@ class Nodo{
         Nodo *next;
         Nodo *izq;
         Nodo *der;
-        Nodo *ordena;
+        Nodo *nextQS;
     public:
         Nodo() {rep = 0; next=NULL;};
         Nodo(string a) {dato=a; next=NULL; rep=0;};
@@ -19,10 +19,12 @@ class Nodo{
         void set_next(Nodo *n) {next=n; };
         void set_izq(Nodo *n) {izq=n; };
         void set_der(Nodo *n) {der=n; };
+        void set_nextQS(Nodo *n) {nextQS=n;};
         string get_dato() {return dato; };
         void set_rep() {rep = rep+1;};
         int get_rep(){return rep;};
         Nodo *get_next() {return next; };
+        Nodo *get_nextQS() {return nextQS;};
         Nodo *&get_izq() {return izq; };
         Nodo *&get_der() {return der; };
         bool es_vacio() {return next==NULL;}
@@ -50,6 +52,7 @@ class Lista{
             void tomar(int n);
             Nodo* last();
             void ordenaInsercion(Nodo* nuevo);
+            void copiarPunteros();
             
 };
 int Lista::size()
@@ -60,8 +63,8 @@ int Lista::size()
 void Lista::impre(void)
 { Nodo *aux;
   aux=czo;
-    while(aux->get_next()->get_next()!=NULL){
-         cout<<aux->get_next()->get_dato()<< " -  repeticiones: "<< aux->get_next()->get_rep()<<endl;
+    while(aux!=NULL){
+         cout<<aux->get_dato()<< " -  repeticiones: "<< aux->get_rep()<<endl;
          aux=aux->get_next();
     }
 }
@@ -241,6 +244,59 @@ void sumarRepeticion(Lista *l, string p){
 	}
 }
 
+Nodo* quickSort(Nodo* czo){
+	if(czo==NULL) return czo;
+	
+	Nodo* menor = NULL;
+	Nodo* mayor = NULL;
+	Nodo* pivot = czo;
+	Nodo* aux= pivot->get_nextQS();
+	
+	while(aux!=NULL){
+		Nodo* prox = aux->get_nextQS();
+		if(aux->get_rep()>pivot->get_rep()){
+			aux->set_nextQS(mayor);
+			mayor = aux;	
+		}else{
+			aux->set_nextQS(menor);
+			menor = aux;
+		}
+		aux = prox;
+	}
+	mayor = quickSort(mayor);
+	menor = quickSort(menor);
+	
+	if(mayor!=NULL){
+		Nodo* finMayor = mayor;
+		while(finMayor->get_nextQS()!=NULL)
+			finMayor = finMayor->get_nextQS();
+		finMayor->set_nextQS(pivot);
+		pivot->set_nextQS(menor);
+		return mayor;
+	}else {
+		pivot->set_nextQS(menor);
+		return pivot;
+	}
+	
+	
+}
+void Lista::copiarPunteros(){
+	Nodo *aux;
+  	aux=czo;
+    while(aux!=NULL){
+         aux->set_nextQS(aux->get_next());
+         aux=aux->get_next();
+    }
+}
+
+void imprimirQS(Nodo* czo){
+	Nodo *aux;
+  	aux=czo;
+    while(aux!=NULL){
+         cout<<aux->get_dato()<< " -  repeticiones: "<< aux->get_rep()<<endl;
+         aux=aux->get_nextQS();
+    }
+}
 	
 int main() {	
 	fstream archivo;
@@ -248,6 +304,7 @@ int main() {
 	Lista* lista = new Lista();
 	arbol T;
 	Nodo* czo = lista->cabeza(); 
+	Nodo *czoQS;
 	
 	archivo.open("texto.txt", ios::in); //abre archivo en modo lectura
 		
@@ -276,6 +333,9 @@ int main() {
 	}
 	archivo.close(); 	
 	lista->impre(); //no imprime la ultima palabra
-	cout << lista->last()->get_dato() <<" - repeticiones " << lista->last()->get_rep() <<  endl;
-	T.IRD();
+	lista->copiarPunteros();
+	cout<<"-----------------------Quick Sort-----------------------------------" << endl;
+	czoQS = quickSort(lista->cabeza());
+	imprimirQS(czoQS);
+	//T.IRD();
 }
