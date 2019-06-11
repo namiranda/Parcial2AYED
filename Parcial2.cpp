@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <cmath>
 
 using namespace std;
 
@@ -164,6 +165,7 @@ class arbol{
     void mh(Nodo* aux);
     string menor(Nodo* aux);
     bool esta(Nodo* aux, string x);
+    int altura(Nodo* aux);
 public:
     arbol(){raiz=NULL;};
     ~arbol(){};
@@ -176,6 +178,7 @@ public:
     void MostrarHojas(){mh(raiz);}
     string Menor(){return menor(raiz);}
     bool Esta(string x){return esta(raiz,x);}
+    int Altura(){altura(raiz);};
 };
 
 
@@ -243,6 +246,11 @@ void arbol::show(Nodo* aux, int n)
        cout<<aux->get_dato()<<"\n";
        show(aux->get_izq(), n+1);
    }
+}
+
+int arbol::altura(Nodo* aux){
+	if(aux==NULL)return 0;
+	else return (1+ max(altura(aux->get_izq()),altura(aux->get_der())));
 }
 //-----------------FIN MÉTODOS ARBOL------------------
 void sumarRepeticion(Lista *l, string p){
@@ -368,6 +376,8 @@ int main() {
 	cout << "Total de palabras distintas: " << contador;
 	grabarArchivo(czo, czoQS);
 	
+	cout<<endl;
+	cout << T.Altura() << endl;
 	
 	//T.IRD();
 }
