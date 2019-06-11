@@ -265,36 +265,36 @@ void sumarRepeticion(Lista *l, string p){
 Nodo* quickSort(Nodo* czo, int& comparaciones){
 	if(czo==NULL) return czo;
 	
-	Nodo* menor = NULL;
-	Nodo* mayor = NULL;
+	Nodo* czoMenor = NULL;
+	Nodo* czoMayor = NULL;
 	Nodo* pivot = czo;
 	Nodo* aux= pivot->get_nextQS();
 	
 	while(aux!=NULL){
 		Nodo* prox = aux->get_nextQS();
 		if(aux->get_rep()>pivot->get_rep()){
-			aux->set_nextQS(mayor);
-			mayor = aux;	
+			aux->set_nextQS(czoMayor);
+			czoMayor = aux;	
 		}else{
-			aux->set_nextQS(menor);
-			menor = aux;
+			aux->set_nextQS(czoMenor);
+			czoMenor = aux;
 		}
 		aux = prox;	
 		comparaciones++;
 	}
 
-	mayor = quickSort(mayor, comparaciones);
-	menor = quickSort(menor, comparaciones);
+	czoMayor = quickSort(czoMayor, comparaciones);
+	czoMenor = quickSort(czoMenor, comparaciones);
 	
-	if(mayor!=NULL){
-		Nodo* finMayor = mayor;
+	if(czoMayor!=NULL){
+		Nodo* finMayor = czoMayor;
 		while(finMayor->get_nextQS()!=NULL)
 			finMayor = finMayor->get_nextQS();
 		finMayor->set_nextQS(pivot);
-		pivot->set_nextQS(menor);
-		return mayor;
+		pivot->set_nextQS(czoMenor);
+		return czoMayor;
 	}else {
-		pivot->set_nextQS(menor);
+		pivot->set_nextQS(czoMenor);
 		return pivot;
 	}
 	
