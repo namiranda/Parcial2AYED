@@ -51,7 +51,7 @@ class Lista{
             Lista *copy(void);
             void tomar(int n);
             Nodo* last();
-            void ordenaInsercion(Nodo* nuevo);
+            void ordenaInsercion(Nodo* nuevo, int& comparaciones);
             void copiarPunteros();
             
 };
@@ -65,6 +65,14 @@ void Lista::impre(void)
   aux=czo;
     while(aux!=NULL){
          cout<<aux->get_dato()<< " -  repeticiones: "<< aux->get_rep()<<endl;
+         aux=aux->get_next();
+    }
+}
+void Lista::copiarPunteros(){
+	Nodo *aux;
+  	aux=czo;
+    while(aux!=NULL){
+         aux->set_nextQS(aux->get_next());
          aux=aux->get_next();
     }
 }
@@ -126,15 +134,17 @@ void Lista::borrar_last()
       else this->resto()->borrar_last(); 
    }  
 }	
-void Lista::ordenaInsercion(Nodo* nuevo){
+void Lista::ordenaInsercion(Nodo* nuevo, int &comparaciones){
 	string palabra = nuevo->get_dato();
 	Nodo* aux = this->cabeza();
 	
 	if(aux == NULL || aux->get_dato() > palabra){ //Si es el ultimo nodo o esta vacia
+		comparaciones++;
 		nuevo->set_next(aux);
 		aux = nuevo;
 	}else {
 		while(aux->get_next()!=NULL && aux->get_next()->get_dato() < palabra){
+			comparaciones++;
 			aux = aux->get_next();
 		}
 		nuevo->set_next(aux->get_next());
@@ -234,7 +244,7 @@ void arbol::show(Nodo* aux, int n)
        show(aux->get_izq(), n+1);
    }
 }
-
+//-----------------FIN MÉTODOS ARBOL------------------
 void sumarRepeticion(Lista *l, string p){
 	if(l->cabeza()->get_dato().compare(p) == 0){
 		l->cabeza()->set_rep();
@@ -244,7 +254,7 @@ void sumarRepeticion(Lista *l, string p){
 	}
 }
 
-Nodo* quickSort(Nodo* czo){
+Nodo* quickSort(Nodo* czo, int& comparaciones){
 	if(czo==NULL) return czo;
 	
 	Nodo* menor = NULL;
@@ -261,10 +271,12 @@ Nodo* quickSort(Nodo* czo){
 			aux->set_nextQS(menor);
 			menor = aux;
 		}
-		aux = prox;
+		aux = prox;	
+		comparaciones++;
 	}
-	mayor = quickSort(mayor);
-	menor = quickSort(menor);
+
+	mayor = quickSort(mayor, comparaciones);
+	menor = quickSort(menor, comparaciones);
 	
 	if(mayor!=NULL){
 		Nodo* finMayor = mayor;
@@ -280,23 +292,37 @@ Nodo* quickSort(Nodo* czo){
 	
 	
 }
-void Lista::copiarPunteros(){
-	Nodo *aux;
-  	aux=czo;
-    while(aux!=NULL){
-         aux->set_nextQS(aux->get_next());
-         aux=aux->get_next();
-    }
-}
 
-void imprimirQS(Nodo* czo){
-	Nodo *aux;
-  	aux=czo;
-    while(aux!=NULL){
-         cout<<aux->get_dato()<< " -  repeticiones: "<< aux->get_rep()<<endl;
-         aux=aux->get_nextQS();
-    }
-}
+void grabarArchivo(Nodo* czoIS, Nodo* czoQS){
+	ofstream archivo;
+	archivo.open("ordenados.txt", ios::out); //abre archivo
+	
+	if(archivo.fail()){
+		cout << "No se pudo abrir el archivo";
+		exit(1);
+	}
+	
+	archivo << "ORDENAMIENTO POR INSERCION" << endl;
+	archivo << endl;
+	
+	Nodo* aux = czoIS->get_next();
+	
+	while(aux!=NULL){
+		archivo<<aux->get_dato() << "--------------------------repeticiones: " << aux->get_rep() << endl;
+		aux = aux->get_next();
+	}
+	
+
+	archivo << "\nORDENAMIENTO POR QUICK SORT" << endl;
+	archivo << endl;
+	
+	aux = czoQS->get_nextQS();
+	
+	while(aux!=NULL){
+		archivo<<aux->get_dato() << "--------------------------repeticiones: " << aux->get_rep() << endl;
+		aux = aux->get_nextQS();
+	}
+} 
 	
 int main() {	
 	fstream archivo;
@@ -305,6 +331,9 @@ int main() {
 	arbol T;
 	Nodo* czo = lista->cabeza(); 
 	Nodo *czoQS;
+	int comparacionesIS = 0;
+	int comparacionesQS = 0;
+	int contador = 0;
 	
 	archivo.open("texto.txt", ios::in); //abre archivo en modo lectura
 		
@@ -321,9 +350,9 @@ int main() {
 			while( iss >> palabra )     
 			{
 				if(!T.Esta(palabra)){
-					lista->ordenaInsercion(T.CreaArbolBus(palabra));
+					lista->ordenaInsercion(T.CreaArbolBus(palabra), comparacionesIS);
+					contador++;
 					//T.VerArbol();
-					//cout<<lista->size();
 					//cout <<"--------------------------------------------------------------" << endl;
 				}
 				else {
@@ -332,10 +361,13 @@ int main() {
 			}
 	}
 	archivo.close(); 	
-	lista->impre(); //no imprime la ultima palabra
+	cout << "comparaciones en Insert Sort: " << comparacionesIS << endl;
 	lista->copiarPunteros();
-	cout<<"-----------------------Quick Sort-----------------------------------" << endl;
-	czoQS = quickSort(lista->cabeza());
-	imprimirQS(czoQS);
+	czoQS = quickSort(czo->get_next(), comparacionesQS);
+	cout <<"comparaciones en Quick Sort: " << comparacionesQS << endl;
+	cout << "Total de palabras distintas: " << contador;
+	grabarArchivo(czo, czoQS);
+	
+	
 	//T.IRD();
 }
