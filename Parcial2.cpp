@@ -9,6 +9,7 @@ class Nodo{
     private: 
         string dato;
         int rep;
+        int equilibrio;
         Nodo *next;
         Nodo *izq;
         Nodo *der;
@@ -23,12 +24,17 @@ class Nodo{
         void set_nextQS(Nodo *n) {nextQS=n;};
         string get_dato() {return dato; };
         void set_rep() {rep = rep+1;};
+        void set_rep(int r) {rep = r;};
         int get_rep(){return rep;};
         Nodo *get_next() {return next; };
         Nodo *get_nextQS() {return nextQS;};
         Nodo *&get_izq() {return izq; };
         Nodo *&get_der() {return der; };
         bool es_vacio() {return next==NULL;}
+        void set_equilibrio(int e){ equilibrio = e;};
+        void increEquilibrio(){equilibrio = equilibrio+1;}; //BORRAR
+         void decEquilibrio(){equilibrio = equilibrio-1;};
+		int get_equilibrio() {return equilibrio;};
 };
 
 class Lista{
@@ -152,8 +158,9 @@ void Lista::ordenaInsercion(Nodo* nuevo, int &comparaciones){
 		aux->set_next(nuevo);
 	}		
 }
-
+//----------------------FIN MÉTODOS LISTA----------------------------------------------
 class arbol{
+	protected:
     Nodo* raiz, q;
     Nodo* ArbolBusq(string x, Nodo* &nuevo);
     void rid(Nodo* aux);
@@ -177,7 +184,10 @@ public:
     void MostrarHojas(){mh(raiz);}
     string Menor(){return menor(raiz);}
     bool Esta(string x){return esta(raiz,x);}
-    Nodo* ArmarAVL (string palabra);
+    Nodo* getRaiz(){return raiz;}; //BORRAR
+    void setRaiz(Nodo* r){raiz = r;};
+
+    
 };
 
 
@@ -253,51 +263,11 @@ int altura(Nodo* aux){
 }
 
 void balanceo(Nodo* raiz);
+Nodo* buscaDesbalance(Nodo* raiz);
 
-Nodo* arbol::ArmarAVL(string palabra){
-	Nodo* aux = ArbolBusq(palabra, this->raiz);
-	cout << "altura izq " << altura(aux->get_izq()) << endl;
-	cout << "altura der " << altura(aux->get_der()) << endl;
-	if((abs(altura(aux->get_izq())-altura(aux->get_der())))>1){
-		cout << "El arbol no esta balanceado" << endl;
-		balanceo(aux);
-		if((abs(altura(aux->get_izq())-altura(aux->get_der())))>1)
-			cout << "NO FUNCIONA" << endl;
-		else cout << "SIIIII FUNCIONA :)" << endl;
-	}
-	return aux;
-}
 //-----------------FIN MÉTODOS ARBOL------------------
-void rotarDerecha(Nodo** raiz){
-	Nodo* tmp = (*raiz)->get_izq();
-	(*raiz)->set_izq(tmp->get_der());
-	tmp->set_der(*raiz);
-	raiz = &tmp;
-}
 
-void rotarIzquierda(Nodo** raiz){
-	Nodo* tmp = (*raiz)->get_der();
-	(*raiz)->set_der(tmp->get_izq());
-	tmp->set_izq(*raiz);
-	raiz = &tmp;
-}
 
-void balanceo(Nodo* raiz){
-	if(altura(raiz->get_izq())>(altura(raiz->get_der())+1) && altura(raiz->get_izq()->get_izq())>altura(raiz->get_izq()->get_der()))
-		rotarDerecha(&raiz);
-		
-	if((altura(raiz->get_der())>(altura(raiz->get_izq()+1))) && altura(raiz->get_der()->get_der())>altura(raiz->get_der()->get_izq()))
-		rotarIzquierda(&raiz);
-		
-	if(altura(raiz->get_izq())==(altura(raiz->get_der())+2) && altura(raiz->get_izq()->get_izq())<altura(raiz->get_izq()->get_der())){
-		rotarIzquierda(&raiz);
-		rotarDerecha(&raiz);}
-		
-	if(altura(raiz->get_der())==(altura(raiz->get_izq()+2)) && altura(raiz->get_der()->get_der())<altura(raiz->get_der()->get_izq())){
-		rotarDerecha(&raiz);
-		rotarIzquierda(&raiz);
-	}		
-}
 
 void sumarRepeticion(Lista *l, string p){
 	if(l->cabeza()->get_dato().compare(p) == 0){
@@ -383,6 +353,7 @@ int main() {
 	string linea;
 	Lista* lista = new Lista();
 	arbol T;
+	//arbolAVL T;
 	Nodo* czo = lista->cabeza(); 
 	Nodo *czoQS;
 	int comparacionesIS = 0;
@@ -404,9 +375,7 @@ int main() {
 			while( iss >> palabra )     
 			{
 				if(!T.Esta(palabra)){
-					//lista->ordenaInsercion(T.CreaArbolBus(palabra), comparacionesIS);
-					//lista->ordenaInsercion(T.ArmarAVL(palabra),comparacionesIS);
-					cout << altura(T.CreaArbolBus(palabra)) << endl;
+					lista->ordenaInsercion(T.CreaArbolBus(palabra), comparacionesIS);
 					contador++;
 					//T.VerArbol();
 					//cout <<"--------------------------------------------------------------" << endl;
